@@ -1,0 +1,131 @@
+version: '2'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    platform: linux/amd64
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+  
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    platform: linux/amd64
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:9092
+      - 19092:19092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092, CONNECTIONS_FROM_HOST://localhost:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  
+  db:
+    image: postgres
+    platform: linux/amd64
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    restart: always
+    ports:
+      - 54320:5432
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: epcsd
+      POSTGRES_PASSWORD: epcsd
+
+  adminer:
+    image: adminer
+    platform: linux/amd64
+    restart: always
+    ports:
+      - 18080:8080
+
+  showcatalog:
+    image: 'showcatalog:${TAG-latest}'
+    ports:
+      - 18081:18081
+    depends_on:
+      - zookeeper
+      - kafka
+      - db
+    build:
+      context: ./Showcatalog
+      dockerfile: Dockerfile
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url"  : "jdbc:postgresql://db:5432/epcsd?useSSL=false",
+        "spring.datasource.username" : "epcsd",
+        "spring.datasource.password" : "epcsd",
+        "spring.kafka.bootstrap-servers" : "kafka:9092",
+        "spring.jpa.show-sql" : false,
+        "spring.jpa.hibernate.ddl-auto" : "update",
+        "spring.batch.jdbc.initialize-schema" : "never",
+        "spring.jpa.defer-datasource-initialization" : false,
+        "spring.sql.init.mode" : "never",
+        "server.error.include-message" : "always",
+        "jwt-security.secret": "V+Wzc1ZAnuErNi94OE6E4XAJtZ9N6AX4B5Lu/Ffb8hM4vJ7McCWfPbXNT3sk4SL5srQiKMiMgSb1wPFWZkrvZw==",
+        "spring.mail.host":"smtp.gmail.com",
+        "spring.mail.username":"cultureindahouse@gmail.com",
+        "spring.mail.password":"jrastbbixfvlfdoi",
+        "spring.mail.port":"587",
+        "spring.mail.protocol":"smtp",
+        "spring.mail.properties.mail.smtp.auth":true,
+        "spring.mail.properties.mail.smtp.starttls.enable":true
+        }'
+  notifications:
+    image: 'notifications:${TAG-latest}'
+    ports:
+      - 18082:18082
+    depends_on:
+      - kafka
+    build:
+      context: ./Notification
+      dockerfile: Dockerfile
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.kafka.bootstrap-servers" : "kafka:9092",
+        "showCatalog.getShowDetails.url" : "http://showcatalog:18081/shows/{id}"}'
+
+  frontend:
+    image: 'frontend:${TAG-latest}'
+    ports:
+      - 80:80
+    depends_on:
+      - showcatalog
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+      args:
+        FRONTEND_ENV: ${FRONTEND_ENV-production}
+
+      
+  prometheus:
+    image: prom/prometheus:v2.35.0
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+  grafana:
+    image: grafana/grafana-oss:8.5.2
+    pull_policy: always
+    container_name: grafana
+    restart: unless-stopped
+    user: root
+    ports:
+      - 3000:3000 # access grafana url
+    volumes:
+      - ./grafana.yml:/etc/grafana/provisioning/datasources/all.yaml
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  app-db-data:
+  prometheus_data: {}
+  grafana_data: {}

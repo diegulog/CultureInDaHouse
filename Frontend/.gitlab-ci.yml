@@ -1,0 +1,23 @@
+stages:
+  - build
+  - test
+  - deploy
+
+node_build:
+  image: node:latest
+  stage: build
+  script:
+    - npm install
+    - npm run build
+
+deploy_prod:
+  stage: deploy
+  script:
+    - cd /home/PDS-GRUPO4/cultureindahouse/Frontend
+    - git pull origin main
+    - sudo docker compose restart frontend
+    - sudo docker compose up --build -d frontend
+  only:
+    - main
+  tags:
+    - Azure

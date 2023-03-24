@@ -1,0 +1,17 @@
+<mjml>
+  <mj-body background-color="#ffffff">
+    <mj-section background-color="#ffffff" padding-bottom="0px" padding-top="0">
+      <mj-column vertical-align="top" width="100%">
+        <mj-image src="https://firebasestorage.googleapis.com/v0/b/cultureindahouse-group4.appspot.com/o/logo.png?alt=media&token=7a2772c1-d441-42e7-b66f-a79dff3361bc" alt="" align="center" border="none" width="140px" padding-left="0px" padding-right="0px" padding-bottom="0px" padding-top="0"></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#009fe3" padding-bottom="20px" padding-top="20px">
+      <mj-column vertical-align="middle" width="100%">
+        <mj-text align="left" color="#ffffff" font-size="22px" font-family="open Sans Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px"><span style="color:#FEEB35">Estimado <span th:text="${name}"></span></span><br /><br /> Bienvenido a CultureInDaHouse.</mj-text>
+        <mj-text align="left" color="#ffffff" font-size="15px" font-family="open Sans Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px">Estamos muy contentos de que hayas decidido darnos una oportunidad. Si tienes alguna pregunta, no dudes en ponerte en contacto con nosotros en cultureindahouse@gmail.com. Puedes acceder a tu cuenta con tu nombre de usuario <span th:text="${username}"></span>.</mj-text>
+        <mj-button align="left" font-size="22px" font-weight="bold" background-color="#ffffff" border-radius="10px" color="#1AA0E1" font-family="open Sans Helvetica, Arial, sans-serif" href="http://cultureindahouse.westeurope.cloudapp.azure.com">Login</mj-button>
+        <mj-text align="left" color="#ffffff" font-size="15px" font-family="open Sans Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px">Gracias, <br /> El equipo de CultureInDaHouse</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 30s
+  scrape_timeout: 10s
+scrape_configs:
+  - job_name: prometheus 
+    static_configs: 
+      - targets: ["localhost:9090"] 
+  - job_name: showcatalog
+    metrics_path: '/actuator/prometheus'
+    static_configs: 
+      - targets: ["showcatalog:18081"] 
+        labels:
+          application: "Showcatalog Application"
+  - job_name: notifications 
+    metrics_path: '/actuator/prometheus'
+    static_configs: 
+      - targets: ["notifications:18082"]
+        labels:
+          application: "Notifications Application"

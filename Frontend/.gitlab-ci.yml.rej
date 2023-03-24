@@ -1,0 +1,9 @@
+diff a/.gitlab-ci.yml b/.gitlab-ci.yml	(rejected hunks)
+@@ -15,6 +15,7 @@
+   script:
+     - cd /home/PDS-GRUPO4/cultureindahouse/Frontend
+     - git pull origin main
++    - sudo docker compose up --build -d frontend
+   only:
+     - main
+   tags:
